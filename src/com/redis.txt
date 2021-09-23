@@ -1,0 +1,118 @@
+Redis的笔记：
+1.String  k-v结构 单个key最大能存 512 约等于 多少个文字？
+ 增(修改)： set key value       例子： set adminName 'zhangsan'
+ 修改就是增加，会自动覆盖
+ 查： get key             例子： get adminName
+ 查询所有的键 key： keys *  例子： keys *
+ 删 key: del key         例子：  del  adminName
+
+ 一、String 的特有的命令：
+ （重要）过期时间： setex  存的时候就直接给定过期时间， 验证码就用它 setex code 60 255
+ （重要）自增（减） incr场景：抖音点赞，产品的热销排名。 自增的值一定要是数字
+ 自减： decr key
+
+ 定量增： incrby 场景：一次增加很多个 incrby mycode 50
+ 定量减： decrby 场景：一次减去很多个 decrby mycode 50
+
+ 批量增： mset key1 value key2 value
+ 批量查看： mget key1 key2
+ 字符串截取： getrange key start end
+ 先查再存： getset  格式： getset key value
+ 将给定的key值设置为 value,并返回key的旧值 ，工资
+ 先时间， 后 value
+ 字符串的长度： strlen key 的长度， 不存在的key的长度是0
+ 字符串的追加： append key value  追加的位置是 value的末尾
+
+
+ //其他的通用命令
+ 1.DUMP 给定key中的值进行  序列化，返回值是  序列化后的值  了解**
+ 2.exists  key值是否存在， 很常用！ 返回值是1  或者 0 1:代表存在，0代表不存在
+ 3.expire  给key做一个 过期时间，写的值是 过期的秒数
+ 例子： set  phoneCode 3343  , expire  phoneCode  60
+ 到期之后，key自动删除 ，这个非常常用！！！
+
+ 4.ttl 查询 还剩余多少时间 过期  秒为单位, 应该场景，1.订单 15分钟有效; 2.考试
+ 5. persist 移除key的过期时间，将key 保持为持久状态。 开票
+ 6. rename 更改key值，这个不常用 自已测试
+ 7. renamenx 当key  新的key不存在时，改名为新名字， 了解
+ 8.type key 返回key 的数据类型 ---5种
+ 9. randomkey 随机出可以key  抽奖常用的， 定名 。 今天的作业4： 做一个随机点名程序，被点到的人移除掉
+
+二、Hash 哈希类型，适合存储对象
+ 增：hset  例子：hset person name lisi    hset只能写一个
+ 删除：hdel   例子：hdel food color
+ 批量增：hmset
+ 例子：hmset person name lisi age 29 boyfriend xiaoha 是后面可以写多个，连着写
+  person 是key  value 是一堆 k-v组合
+ 批量查：hmget human name age
+
+ 查： hget food color
+查所有的key: hkeys food      例子：hkeys human
+查所有key 和value: hgetall human
+hash 字段的自增： hincrby human age 10
+hash 字段的自减： hdecrby human age 10
+
+hash 数据类型的遍历： Hscan 不怎么常用 扫描的意思
+
+三、 list --双端队列结构。 先进后出 ，排序是按照 插入的顺序排序的 ，有顺序且能重复
+比如：   沙和尚 猪八戒   孙悟空  唐僧   林子   刘备  关羽  张飞  赵四
+左边增： lpush  key XXX
+右边增:  rpush  key XXX
+遍历：  lrange key 0 -1  从0到-1就是遍历全部
+ 左边删除： lpop key
+ 右边删除： rpop key
+ 在。。。之前插入： linsert key before  “刘备”  '林子'
+查单个：  lindex hero 0
+删除指定的值， 比较复杂 lrem hero count value    ----》count（就是0 和1）
+count >0  表示从头向尾巴，从左到右 搜索，移除 和value相等的元素，数量为count
+count >0  表示从尾巴向头，从右到左 搜索，移除 和value相等的元素，数量为count的绝对值
+count=0   表示 移除表中所有与value相等的值
+注意：因为是list的数据类型，所以 值是可以 相同的，比如有2个 小白，2个唐僧
+
+
+四：set数据类型，set无序，不能重复，做扑克牌
+增:  sadd key value
+查条数： scard  key 获取key的成员数量
+查全： smembers key  返回集合中的所有value（指的是值）
+ 是没有 按索引查单的   因为是无序的，没有顺序
+ 指定的删除： srem key value
+ 随机删除！ 用途很广，  spop names
+ 作业： 用java代码写， 把咱们班33个人的名字，形成一个集合，点一个人的名字，就把这个人的名字移除，再次点名
+ 是点 32 个人的随机中的一个.
+ 随机查： srandmember
+
+ 五、zset sortset, 有序的set集合； 可以有顺序但是不重复
+ 他是set的扩展版， 每个元素都关联了个 double类型的分数， 根据分数的大小，进行排序
+ 排序规则是 从小到大，  分数可以并列即 分数可以重复， 成员（value）必须唯一；
+ 底层是 哈希表实现的， 添加删除很快；
+
+ 增加： zadd key 分数  值  pnames
+ 遍历： zrange key 0 -1 withscores  加上 withscores  带分数（下标）， 不带直接全部显示值
+ 查条数： zcard key
+ 指定的删除： 移除集合中的一个或者多个成员 zrem key value
+
+ 以上就是 redis 常用的命令！  还有很多 不常用的命令， 自已去 菜鸟 Redis官网去完善
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
